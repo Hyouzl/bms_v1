@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="order">
+
+	<insert id="insertOrder" parameterType="OrderDto">
+		INSERT INTO
+			 `ORDER` (
+			    MEMBER_ID,
+			    GOODS_CD,
+				ORDER_GOODS_QTY,
+				PAYMENT_AMT,
+			    ORDERER_NM,
+			    ORDERER_HP,
+			    RECEIVER_NM,
+				RECEIVER_HP,
+				ZIPCODE,
+				ROAD_ADDRESS,
+				JIBUN_ADDRESS,
+				NAMUJI_ADDRESS,
+				DELIVERY_METHOD,
+				DELIVERY_MESSAGE,
+			    DELIVERY_STATUS,
+				GIFT_WRAPPING,
+				PAY_METHOD,
+				PAY_ORDERER_HP,
+				CARD_COMPANY_NM,
+			    CARD_PAY_MONTH,
+				PAY_ORDER_TIME
+		)
+		VALUES (
+			    #{memberId},
+			    #{goodsCd},
+			    #{orderGoodsQty},
+			    #{paymentAmt},
+			    #{ordererNm},
+                #{ordererHp},
+			    #{receiverNm},
+			    #{receiverHp},
+			    #{zipcode},
+			    #{roadAddress},
+			    #{jibunAddress},
+			    #{namujiAddress},
+                #{deliveryMethod},
+                #{deliveryMessage},
+                '배송준비중',
+                #{giftWrapping},
+                #{payMethod},
+                #{payOrdererHp},
+                #{cardCompanyNm},
+                #{cardPayMonth},
+                NOW()
+       )
+	</insert>
+	
+	<select id="selectOneOrderer" parameterType="String" resultType="MemberDto">
+		SELECT
+				*
+		FROM
+				MEMBER
+		WHERE
+				MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectOneCartGoods" parameterType="int" resultType="GoodsDto">
+		SELECT
+				*
+		FROM
+				GOODS
+		WHERE
+				
+				GOODS_CD = #{goodsCd}
+	</select>
+	
+	<select id="selectListCartGoods" resultType="GoodsDto">
+		SELECT
+				*
+		FROM
+				GOODS G
+		    JOIN CART C
+			  	   ON G.GOODS_CD = C.GOODS_CD	
+				  AND G.GOODS_CD IN
+						<foreach collection="array" item="goodsCd" separator="," open="(" close=")" >
+							#{goodsCd}
+						</foreach> 
+		ORDER BY
+				C.ENROLL_DT DESC
+	</select>
+	
+	<insert id="insertOrderByCart">
+		INSERT INTO `ORDER` (
+			    MEMBER_ID,
+			    GOODS_CD,
+				ORDER_GOODS_QTY,
+				PAYMENT_AMT,
+			    ORDERER_NM,
+			    ORDERER_HP,
+			    RECEIVER_NM,
+				RECEIVER_HP,
+				ZIPCODE,
+				ROAD_ADDRESS,
+				JIBUN_ADDRESS,
+				NAMUJI_ADDRESS,
+				DELIVERY_METHOD,
+				DELIVERY_MESSAGE,
+			    DELIVERY_STATUS,
+				GIFT_WRAPPING,
+				PAY_METHOD,
+				PAY_ORDERER_HP,
+				CARD_COMPANY_NM,
+			    CARD_PAY_MONTH,
+				PAY_ORDER_TIME
+		)
+		VALUES 
+			<foreach collection="list" item="orderDto" separator=",">
+				(
+				    #{orderDto.memberId},
+				    #{orderDto.goodsCd},
+				    #{orderDto.orderGoodsQty},
+				    #{orderDto.paymentAmt},
+				    #{orderDto.ordererNm},
+	                #{orderDto.ordererHp},
+				    #{orderDto.receiverNm},
+				    #{orderDto.receiverHp},
+				    #{orderDto.zipcode},
+				    #{orderDto.roadAddress},
+				    #{orderDto.jibunAddress},
+				    #{orderDto.namujiAddress},
+	                #{orderDto.deliveryMethod},
+	                #{orderDto.deliveryMessage},
+	                '배송준비중',
+	                #{orderDto.giftWrapping},
+	                #{orderDto.payMethod},
+	                #{orderDto.payOrdererHp},
+	                #{orderDto.cardCompanyNm},
+	                #{orderDto.cardPayMonth},
+	                NOW()
+		       )
+			</foreach> 
+		
+	</insert>
+	
+	<update id="updateGoodsStockCnt" parameterType="hashmap">
+		UPDATE
+				GOODS
+		SET
+				STOCK = STOCK - #{orderGoodsQty}
+		WHERE
+				GOODS_CD = #{goodsCd}
+	</update>
+
+	<update id="updateMemberPoint" parameterType="hashmap">
+		UPDATE
+				MEMBER
+		SET
+				POINT = POINT + #{point}
+		WHERE
+				MEMBER_ID = #{memberId}
+	</update>
+	
+	<update id="updateGoodsStockCntByCart" >
+		<foreach collection="list" item="goodsMap" separator=";" >
+			UPDATE
+					GOODS
+			SET
+					STOCK = STOCK - #{goodsMap.orderGoodsQty}
+			WHERE
+					GOODS_CD = #{goodsMap.goodsCd}
+		</foreach> 
+	</update>
+
+	<update id="updateMemberPointByCart" parameterType="hashmap">
+		UPDATE
+				MEMBER
+		SET
+				POINT = POINT + #{point}
+		WHERE
+				MEMBER_ID = #{memberId}
+	</update>
+	
+	<delete id="deleteCartByOrder" >
+		DELETE FROM 
+				CART
+		WHERE
+				CART_CD IN
+				<foreach collection="array" item="cartCd" separator="," open="(" close=")" >
+					#{cartCd}
+				</foreach> 
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+
+	<select id="selectOneNewBookCnt" resultType="int">
+		SELECT
+				COUNT(*)
+		FROM
+				GOODS
+		WHERE
+				SORT = 'new'
+	</select>
+	
+	<select id="selectOneGeneralBookCnt" resultType="int">
+		SELECT
+				COUNT(*)
+		FROM
+				GOODS
+		WHERE
+				SORT = 'general'
+	</select>
+	
+	<select id="selectOneBestSellerCnt" resultType="int">
+		SELECT
+				COUNT(*)
+		FROM
+				GOODS
+		WHERE
+				SORT = 'best'
+	</select>
+	
+	<select id="selectOneSteadySellerCnt" resultType="int">
+		SELECT
+				COUNT(*)
+		FROM
+				GOODS
+		WHERE
+				SORT = 'steady'
+	</select>
+	
+	<resultMap type="hashmap" id="mainGoodsMap">
+		<result column="GOODS_CD" 		 property="goodsCd"/>
+		<result column="GOODS_NM" 		 property="goodsNm"/>
+		<result column="PRICE"    		 property="price"/>
+		<result column="DISCOUNT_RATE"   property="discountRate"/>
+		<result column="GOODS_FILE_NAME" property="goodsFileName"/>
+	</resultMap>
+	
+	<select id="selectListGoodsNewBooks" resultMap="mainGoodsMap">
+	    SELECT 
+	    		GOODS_CD,
+	    		GOODS_NM,
+	    		PRICE,
+	    		DISCOUNT_RATE,
+	    		GOODS_FILE_NAME
+	    FROM 
+	    		GOODS
+	    WHERE
+	    		SORT = 'new'
+	    ORDER BY
+	    		PUBLISHED_DT DESC
+		LIMIT 
+				3
+	</select>
+	
+	<select id="selectListGoodsBestBooks" resultMap="mainGoodsMap">
+	    SELECT 
+	    		GOODS_CD,
+	    		GOODS_NM,
+	    		PRICE,
+	    		DISCOUNT_RATE,
+	    		GOODS_FILE_NAME
+	    FROM 
+	    		GOODS
+	    WHERE
+	    		SORT = 'best'
+	    ORDER BY
+	    		PUBLISHED_DT DESC
+		LIMIT 
+				3
+	</select>
+	
+	<select id="selectListGoodsSteadyBooks" resultMap="mainGoodsMap">
+	    SELECT 
+	    		GOODS_CD,
+	    		GOODS_NM,
+	    		PRICE,
+	    		DISCOUNT_RATE,
+	    		GOODS_FILE_NAME
+	    FROM 
+	    		GOODS
+	    WHERE
+	    		SORT = 'steady'
+	    ORDER BY
+	    		PUBLISHED_DT DESC
+		LIMIT 
+				3
+	</select>
+	
+	<insert id="insertContact" parameterType="ContactDto">
+		INSERT INTO CONTACT(
+				NAME,
+				EMAIL,
+				SUBJECT,
+				CONTENT,
+				REG_DT
+		)
+		VALUES (
+				#{name},
+				#{email},
+				#{subject},
+				#{content},
+				NOW()
+		)
+	</insert>
+	
+	<select id="selectListContact" resultType="ContactDto">
+		SELECT
+				*
+		FROM
+				CONTACT
+		ORDER BY
+				REG_DT DESC
+	</select>
+	
+	<select id="selectOneContact" parameterType="int" resultType="ContactDto">
+		SELECT
+				*
+		FROM
+				CONTACT
+		WHERE
+				CONTACT_CD = #{contactCd}
+	</select>
+	
+	<delete id="deleteContact" >
+		DELETE FROM
+				CONTACT
+		WHERE
+				CONTACT_CD IN 
+		<foreach collection="array" item="contactCd" separator="," open="("  close=")" >
+				#{contactCd}
+		</foreach>
+	</delete>
+	
+</mapper>

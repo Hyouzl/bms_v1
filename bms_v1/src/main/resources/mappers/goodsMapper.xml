@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="goods">
+	
+	<select id="selectListGoods" parameterType="String" resultType="GoodsDto" >
+		SELECT 
+	   			*
+	    FROM 
+				GOODS
+		<where>
+			<if test='!sort.equals("all") and !part.equals("all")'>
+				SORT = #{sort} AND PART = #{part}
+			</if>
+			<if test='!sort.equals("all") and part.equals("all")'>
+				SORT = #{sort} AND PART IN ('programming' , 'network' , 'server' , 'cloud' , 'bigDate' , 'artificialIntelligence' , 'certificate')
+			</if>
+			<if test='sort.equals("all") and part.equals("all")'>
+				SORT IN ('new' , 'best' , 'steady' , 'general') AND PART IN ('programming' , 'network' , 'server' , 'cloud' , 'bigDate' , 'artificialIntelligence' , 'certificate')
+			</if>
+		</where> 	            		       
+	</select>
+	
+	<select id="selectListRelatedGoods" parameterType="hashmap" resultType="GoodsDto" >
+		SELECT 
+	   			*
+	    FROM 
+				GOODS
+		WHERE
+				SORT = #{sort} AND GOODS_CD != #{goodsCd}
+		ORDER BY
+				PUBLISHED_DT DESC
+		LIMIT	
+				4            		       
+	</select>
+	
+	<select id="selectListSearchGoods" parameterType="hashmap" resultType="GoodsDto" >
+
+		<if test='method == "price"'>
+			SELECT 
+		   			*
+		    FROM 
+					GOODS
+			WHERE
+					PRICE BETWEEN #{min} AND #{max} 
+			ORDER BY
+					PRICE
+		</if>
+		<if test='method == "keyword"'>
+			SELECT 
+		   			*
+		    FROM 
+					GOODS
+			ORDER BY
+				<if test='keyword == "publishedDt"'>
+					PUBLISHED_DT DESC
+				</if>
+				<if test='keyword == "highPrice"'>
+					PRICE DESC
+				</if>
+				<if test='keyword == "lowPrice"'>
+					PRICE ASC
+				</if>
+				<if test='keyword == "discountRate"'>
+					DISCOUNT_RATE DESC
+				</if>
+		</if>
+		<if test='method == "search"'>
+			SELECT 
+		   			*
+		    FROM 
+					GOODS
+			WHERE
+					GOODS_NM  LIKE CONCAT('%' , #{word} , '%') OR
+					WRITER 	  LIKE CONCAT('%' , #{word} , '%') OR
+					PUBLISHER LIKE CONCAT('%' , #{word} , '%') OR
+					INTRO     LIKE CONCAT('%' , #{word} , '%') 
+		</if>
+		
+	</select>
+	
+	<select id="selectOneGoods" parameterType="int" resultType="GoodsDto">
+	    SELECT 
+	    		*
+	    FROM 
+	    		GOODS  
+        WHERE 
+        		GOODS_CD = #{goodsCd}
+	</select>
+	
+</mapper>
